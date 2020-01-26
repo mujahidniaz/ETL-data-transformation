@@ -1,0 +1,8 @@
+aiohttp
+nest_asyncio
+sqlalchemy
+numpy
+pandas
+psycopg2
+psycopg2-binary
+aiohttp_index

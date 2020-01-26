@@ -1,0 +1,22 @@
+version: '3'
+services:
+  hofner:
+    build: .
+    restart: always
+    ports:
+     - "8080:8080"
+    volumes:
+     - .:/code
+    depends_on:
+      - postgres
+    command: ["python", "api.py"]
+    volumes:
+      - .:/code
+  postgres:
+    image: hoeffner/bestsellers:latest
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports: 
+      - "5432:5432"
+    environment:
+      - PGDATA=/data

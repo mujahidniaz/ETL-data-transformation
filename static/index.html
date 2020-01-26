@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hoefner Coding Challenge</title>
+<link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<style>
+.table>thead>tr>th {
+    text-align: center;
+    background: #706e6e;
+    font-size: 16px;
+    color: white;
+    vertical-align: bottom;
+    border-bottom: 2px solid #ddd;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 2% ;text-align: center; ">
+    <h1>Hoefner Coding Challenge </h1>
+    </div>
+    <div class="row" style="margin-top: 2%">
+        <div class="row">
+            <div class="row text-center">
+                <div class="col-md-10 col-md-offset-1">
+            <form class="form-inline mr-auto">
+              <input id='user_query' class="form-control" type="text" placeholder="Type date here.. FORMAT= 'YYYY-MM-DD'" aria-label="Search" style="width:55%">
+              <button class="btn btn-primary btn-rounded btn-md my-0 ml-md-3" type="button" style="width: 19%" onclick="SendGet()"  >Generate Clean Data</button>
+              
+            </form>
+                </div>
+            </div>
+         </div>
+         <div class="row" style="margin-top: 2%">
+            <div id='loader' class="row" style="position: absolute;text-align: center;visibility: hidden;"><img style="margin-left:70% ;" src="/public/loading1.gif"/></div>
+            <table id="stargazer_table"  class="table table-bordered table-striped">
+            <thead>
+            <tr>
+            <th>ISBN</th><th>Title</th><th>Author</th><th>Publisher</th><th>Published Date</th><th>Rank</th><th>Amazon URL</th><th>Description</th>
+            </tr>
+            </thead>
+            <tbody id="result_table" >
+
+            </tbody>
+            </table>
+         </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+function SendGet()
+{
+    
+var usr_query= $("#user_query").val();
+try
+{
+    
+$('#loader').css("visibility", "visible");
+jQuery.ajax({
+          url: "http://localhost:8080/data/clean?date="+usr_query,
+          type: "Get",
+          contentType: 'application/json',
+          mode:"no-cors",
+          success: function(result) {
+          
+          if(result==null||result=="")
+          {
+              alert("No Data Found !!!");
+          }
+          constructTable("#result_table",result);
+          $('#loader').css("visibility", "hidden");
+         console.log(result);
+          }
+});
+}
+catch(e)
+{
+    $('#loader').css("visibility", "hidden");
+    console.log("Error")
+    $("#result_table").val(e);   
+}
+}
+
+function constructTable(selector,list) { 
+
+   try
+   {
+    $(selector).empty();
+              // Getting the all column names 
+              var cols = Headers(list, selector);   
+     
+              // Traversing the JSON data 
+              for (var i = 0; i < list.length; i++) { 
+                  var row = $('<tr/>');    
+                  for (var colIndex = 0; colIndex < cols.length; colIndex++) 
+                  { 
+                      var val = list[i][cols[colIndex]]; 
+                        
+                      // If there is any key, which is matching 
+                      // with the column name 
+                      if (val == null) val = "";   
+                          row.append($('<td/>').html(val)); 
+                  } 
+                    
+                  // Adding each row to the table 
+                  $(selector).append(row); 
+              } 
+      }
+      catch(e)
+      {
+          console.log("Error")
+      }
+    
+    } 
+            
+          function Headers(list, selector) { 
+              var columns = []; 
+              var header = $('<tr/>'); 
+                
+              for (var i = 0; i < list.length; i++) { 
+                  var row = list[i]; 
+                    
+                  for (var k in row) { 
+                      if ($.inArray(k, columns) == -1) { 
+                          columns.push(k); 
+                            
+                          // Creating the header 
+                          header.append($('<th/>').html(k)); 
+                      } 
+                  } 
+              } 
+                
+              // Appending the header to the table 
+             // $(selector).append(header); 
+                  return columns; 
+          } 
+          var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,'
+                , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+                , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })()
+</script>
+</body>
+</html>
